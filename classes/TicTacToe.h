@@ -17,6 +17,7 @@ public:
 
     // set up the board
     void        setUpBoard() override;
+    void        renderOverlay();
 
     Player*     checkForWinner() override;
     bool        checkForDraw() override;
@@ -34,6 +35,14 @@ public:
 private:
     Bit *       PieceForPlayer(const int playerNumber);
     Player*     ownerAt(int index ) const;
+    bool        _actionsDisabled = false;
+    bool        _hasWinner = false;
+    int         _winningTriple[3];
+    ImVec2      _winP1;
+    ImVec2      _winP2;
+    bool        _requestRestart = false;
+public:
+    bool        takeRestartRequest();
 
     Square      _grid[3][3];
 };

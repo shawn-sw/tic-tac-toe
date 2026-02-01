@@ -32,6 +32,7 @@ public:
         _location = point;
     }
     const ImVec2 &getPosition() { return _location; }
+    const ImVec2 &getSize() const { return _size; }
 
     void setSize(float x, float y)
     {
