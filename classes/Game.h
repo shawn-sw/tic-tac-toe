@@ -24,6 +24,7 @@ struct GameOptions
 	int AIDepthSearches;
 	int AIMAXDepth;
 	bool AIvsAI;
+	int AIDifficulty; // 0=two-player, 1=easy, 2=medium, 3=hard
 };
 
 class Game
@@ -105,4 +106,3 @@ public:
 
 	int						_gameNumber;
 };
-

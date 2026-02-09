@@ -1,5 +1,73 @@
 #include "TicTacToe.h"
 
+namespace {
+    const int kHumanMark = 1; // player 0 (O) -> state char '1'
+    const int kAIMark = 2;    // player 1 (X) -> state char '2'
+
+    int winnerForBoard(const int board[9]) {
+        const int win[8][3] = {
+            {0, 1, 2}, {3, 4, 5}, {6, 7, 8},
+            {0, 3, 6}, {1, 4, 7}, {2, 5, 8},
+            {0, 4, 8}, {2, 4, 6}
+        };
+        for (int i = 0; i < 8; ++i) {
+            int a = board[win[i][0]];
+            if (a != 0 && a == board[win[i][1]] && a == board[win[i][2]]) {
+                return a;
+            }
+        }
+        return 0;
+    }
+
+    bool boardHasEmpty(const int board[9]) {
+        for (int i = 0; i < 9; ++i) {
+            if (board[i] == 0) return true;
+        }
+        return false;
+    }
+
+    int negamax(int board[9], int currentPlayer) {
+        int winner = winnerForBoard(board);
+        if (winner != 0) {
+            return (winner == currentPlayer) ? 1 : -1;
+        }
+        if (!boardHasEmpty(board)) return 0;
+
+        int bestScore = -2;
+        int nextPlayer = (currentPlayer == kAIMark) ? kHumanMark : kAIMark;
+        for (int i = 0; i < 9; ++i) {
+            if (board[i] != 0) continue;
+            board[i] = currentPlayer;
+            int score = -negamax(board, nextPlayer);
+            board[i] = 0;
+            if (score > bestScore) {
+                bestScore = score;
+                if (bestScore == 1) break;
+            }
+        }
+        return bestScore;
+    }
+
+    int negamaxAlphaBeta(int board[9], int currentPlayer, int alpha, int beta) {
+        int winner = winnerForBoard(board);
+        if (winner != 0) {
+            return (winner == currentPlayer) ? 1 : -1;
+        }
+        if (!boardHasEmpty(board)) return 0;
+
+        int nextPlayer = (currentPlayer == kAIMark) ? kHumanMark : kAIMark;
+        for (int i = 0; i < 9; ++i) {
+            if (board[i] != 0) continue;
+            board[i] = currentPlayer;
+            int score = -negamaxAlphaBeta(board, nextPlayer, -beta, -alpha);
+            board[i] = 0;
+            if (score > alpha) alpha = score;
+            if (alpha >= beta) break; // prune
+        }
+        return alpha;
+    }
+}
+
 // -----------------------------------------------------------------------------
 // TicTacToe.cpp
 // -----------------------------------------------------------------------------
@@ -407,19 +475,99 @@ bool TicTacToe::takeRestartRequest()
 void TicTacToe::updateAI() 
 {
     // Find all empty holders
-    std::vector<BitHolder*> emptyHolders;
+    std::vector<int> emptyIndices;
     for (int y = 0; y < 3; y++) {
         for (int x = 0; x < 3; x++) {
             if (_grid[y][x].empty()) {
-                emptyHolders.push_back(&_grid[y][x]);
+                emptyIndices.push_back(y * 3 + x);
             }
         }
     }
-    
-    // If there are empty holders, randomly choose one and place a piece
-    if (!emptyHolders.empty()) {
-        int randomIndex = rand() % emptyHolders.size();
-        actionForEmptyHolder(emptyHolders[randomIndex]);
+
+    if (emptyIndices.empty()) return;
+
+    // Difficulty handling: medium uses negamax; hard uses alpha-beta pruning.
+    switch (_gameOptions.AIDifficulty) {
+        case 0: // two-player mode; AI shouldn't run
+            return;
+        case 1: // easy
+        default: {
+            int randomIndex = rand() % emptyIndices.size();
+            int idx = emptyIndices[randomIndex];
+            actionForEmptyHolder(&_grid[idx / 3][idx % 3]);
+            return;
+        }
+        case 2: { // medium: negamax
+            int board[9] = {0};
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 3; x++) {
+                    Bit *bit = _grid[y][x].bit();
+                    if (!bit) continue;
+                    Player *owner = bit->getOwner();
+                    if (!owner) continue;
+                    int idx = y * 3 + x;
+                    int pn = owner->playerNumber();
+                    board[idx] = (pn == 0) ? kHumanMark : kAIMark;
+                }
+            }
+
+            int bestScore = -2;
+            int bestIndex = -1;
+            for (int idx : emptyIndices) {
+                board[idx] = kAIMark;
+                int score = -negamax(board, kHumanMark);
+                board[idx] = 0;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestIndex = idx;
+                    if (bestScore == 1) break;
+                }
+            }
+
+            if (bestIndex >= 0) {
+                actionForEmptyHolder(&_grid[bestIndex / 3][bestIndex % 3]);
+            } else {
+                int randomIndex = rand() % emptyIndices.size();
+                int idx = emptyIndices[randomIndex];
+                actionForEmptyHolder(&_grid[idx / 3][idx % 3]);
+            }
+            return;
+        }
+        case 3: { // hard: negamax with alpha-beta pruning
+            int board[9] = {0};
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 3; x++) {
+                    Bit *bit = _grid[y][x].bit();
+                    if (!bit) continue;
+                    Player *owner = bit->getOwner();
+                    if (!owner) continue;
+                    int idx = y * 3 + x;
+                    int pn = owner->playerNumber();
+                    board[idx] = (pn == 0) ? kHumanMark : kAIMark;
+                }
+            }
+
+            int bestScore = -2;
+            int bestIndex = -1;
+            for (int idx : emptyIndices) {
+                board[idx] = kAIMark;
+                int score = -negamaxAlphaBeta(board, kHumanMark, -2, 2);
+                board[idx] = 0;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestIndex = idx;
+                    if (bestScore == 1) break;
+                }
+            }
+
+            if (bestIndex >= 0) {
+                actionForEmptyHolder(&_grid[bestIndex / 3][bestIndex % 3]);
+            } else {
+                int randomIndex = rand() % emptyIndices.size();
+                int idx = emptyIndices[randomIndex];
+                actionForEmptyHolder(&_grid[idx / 3][idx % 3]);
+            }
+            return;
+        }
     }
 }
-

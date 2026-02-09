@@ -40,21 +40,43 @@ namespace ClassGame {
                 ImGui::Text("Game Mode:");
                 if (ImGui::Button("Two Player", ImVec2(120, 0))) {
                     game->_gameOptions.AIPlaying = false;
+                    game->_gameOptions.AIDifficulty = 0;
                     game->stopGame();
                     game->setUpBoard();
                     gameOver = false;
                     gameWinner = -1;
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("vs AI", ImVec2(120, 0))) {
+                if (ImGui::Button("EASY AI", ImVec2(120, 0))) {
                     game->_gameOptions.AIPlaying = true;
+                    game->_gameOptions.AIDifficulty = 1;
                     game->setAIPlayer(1);  // AI is player 1 (X)
                     game->stopGame();
                     game->setUpBoard();
                     gameOver = false;
                     gameWinner = -1;
                 }
-                
+                ImGui::Separator();
+                if (ImGui::Button("MEDIUM AI", ImVec2(120, 0))) {
+                    game->_gameOptions.AIPlaying = true;
+                    game->_gameOptions.AIDifficulty = 2;
+                    game->setAIPlayer(1);  // AI is player 1 (X)
+                    game->stopGame();
+                    game->setUpBoard();
+                    gameOver = false;
+                    gameWinner = -1;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("HARD AI", ImVec2(120, 0))) {
+                    game->_gameOptions.AIPlaying = true;
+                    game->_gameOptions.AIDifficulty = 3;
+                    game->setAIPlayer(1);  // AI is player 1 (X)
+                    game->stopGame();
+                    game->setUpBoard();
+                    gameOver = false;
+                    gameWinner = -1;
+                }
+
                 ImGui::Separator();
                 
                 // Show current player as O or X

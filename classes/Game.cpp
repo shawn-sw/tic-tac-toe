@@ -16,6 +16,7 @@ Game::Game()
 	_gameOptions.score = 0;
 	_gameOptions.AIDepthSearches = 0;
 	_gameOptions.AIvsAI = false;
+	_gameOptions.AIDifficulty = 0;
 	
 	_score = 0;
 	_table = nullptr;
@@ -173,4 +174,3 @@ bool Game::gameHasAI()
 void Game::updateAI()
 {
 }
-
