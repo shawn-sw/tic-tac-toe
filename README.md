@@ -1,62 +1,48 @@
-Tic-Tac-Toe Game
+# Tic-Tac-Toe Game
+
 This logger implementation was developed on the macOS platform. The entire project is built upon the starter code and materials provided by UCSC CMPM 123 course.
 
-Development Approach and Problem Clarification
-This project implements a simple two-player XO (Tic-Tac-Toe) style game with a clear focus on interaction flow, game state management, and user feedback.
+## Game Modes and AI Design
 
-Before implementation, the core problems were clarified as follows:
+In this assignment, the original AI mode from the previous version was simplified into a **Simple Mode**, and two more advanced AI difficulty levels were added: **Medium Mode** and **Hard Mode**.
 
-How to determine game end states (win or draw) reliably.
-How to lock player input once a match is finished.
-How to provide clear visual and UI feedback for wins, draws, and retries.
-How to ensure consistent behavior when restarting or switching game modes.
-Core Features
-Two-player game with Player X and Player O
-Automatic turn switching between X and O
-Win detection with:
-Visual line connecting the three winning positions
-Winner popup indicating the result
-Draw detection and display in the same winner popup
-Input is disabled once a match ends
-Automatic retry when:
-Clicking OK in the winner popup
-Switching game modes
-Retry button that is always visible and functional in Settings
-Current player display in Settings using X / O notation
-Main Classes
-GameManager
+The goal of this redesign was to clearly separate different levels of decision-making complexity and to demonstrate the progression of game AI techniques taught in class.
 
-Controls overall game flow
-Tracks current player (X / O)
-Handles game state transitions (playing, win, draw)
-Triggers retry logic
-Board / Grid
+### Simple Mode (Random)
+Simple Mode does not use any game-tree search or evaluation strategy.  
+The AI selects moves Random, serving as a baseline behavior and an easy opponent for players.
 
-Stores the board state
-Validates player moves
-Checks win and draw conditions
-Cell / Tile
+### Medium Mode (Negamax Algorithm)
+Medium Mode uses the Negamax algorithm to evaluate possible game states.
+Capable of draw (or win, if human player is not optimizing); this should be true if algorithm is implemented correctly.
+This mode demonstrates full game-tree traversal and optimal play for a small search space like Tic-Tac-Toe.
 
-Represents a single position on the board
-Handles player input for that position
-Renders X or O when occupied
-UIManager
+### Hard Mode (Alpha-Beta Pruning)
+Branches that cannot influence the final decision are pruned early. This significantly reduces the number of nodes evaluated without changing the final decision.
+Although Tic-Tac-Toe has a small state space, this mode demonstrates how pruning improves efficiency and scalability for larger games.
 
-Displays current player information
-Manages the winner popup
-Handles retry and mode switching UI
-Building
+
+## Building
+
 Build using CMake:
 
+```bash
 cd build
 cmake ..
 make
+```
+
 Run the compiled executable:
 
+```bash
 ./demo
+```
+
 No external dependencies are required beyond the base environment.
 
-Project Structure
+## Project Structure
+
+```
 .
 ├── classes/
 │   ├── GameManager
@@ -73,7 +59,9 @@ Project Structure
 ├── Application.h
 ├── CMakeLists.txt
 └── README.md
-classes/ contains all gameplay and logic code
-imgui/ includes the ImGui UI framework
-resources/ stores visual and UI resources
-build/ contains compiled output
+```
+
+- `classes/` contains all gameplay and logic code
+- `imgui/` includes the ImGui UI framework
+- `resources/` stores visual and UI resources
+- `build/` contains compiled output
